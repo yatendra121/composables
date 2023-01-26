@@ -1,0 +1,73 @@
+{
+  "name": "@qnx/composables",
+  "version": "0.0.1",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yatendra121/composables.git"
+  },
+  "scripts": {
+    "serve": "vite preview",
+    "build": "vite build && vue-tsc --pretty  --declaration --emitDeclarationOnly",
+    "dev": "vite",
+    "build:types": "rollup --config build/rollup.types.config.js",
+    "build-force": "pnpm build && pnpm build:types"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./src/index.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.ts",
+      "require": "./dist/index.js"
+    },
+    "./*": "./*",
+    "./axios": {
+      "types": "./dist/axios.d.ts",
+      "require": "./dist/axios.js",
+      "import": "./src/axios.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/index.d.ts"
+      ],
+      "axios": [
+        "dist/axios.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "axios": "^1.2.1",
+    "fast-glob": "^3.2.12",
+    "micromatch": "^4.0.5",
+    "path": "^0.12.7",
+    "rollup": "^3.8.1",
+    "rollup-plugin-dts": "^5.1.0",
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.4",
+    "vite": "4.0.3",
+    "vitest": "^0.25.8",
+    "vue": "^3.2.45",
+    "vue-tsc": "^1.0.16"
+  },
+  "peerDependencies": {
+    "axios": "*",
+    "vue": "*"
+  },
+  "peerDependenciesMeta": {
+    "axios": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  }
+}
