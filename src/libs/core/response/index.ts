@@ -1,33 +1,38 @@
-type ApiErrorCode = string | null;
-type ApiErrors = Record<string, string[]> | null;
-type ApiMessage = string | null;
-type ApiError = string | null;
-type ApiServerError = any | null;
-
-export interface ApiDataResponse<T = any> {
-  data: T | null;
-  errorCode: ApiErrorCode;
-  errors: ApiErrors;
-  error: ApiError;
-  message: ApiMessage;
-  serverError: ApiServerError;
-}
+type ApiErrorCode = string;
+type ApiErrors = Record<string, string[]>;
+type ApiMessage = string;
+type ApiError = string;
+type ApiServerError = any;
 
 export interface ApiResponseInterface<T = any> {
-  getData: () => T | null;
-  getErrorCode: () => ApiErrorCode;
-  getErrors: () => ApiErrors;
-  getMessage: () => ApiMessage;
-  getError: () => string | null;
+  data?: T;
+  errorCode?: ApiErrorCode;
+  errors?: ApiErrors;
+  error?: ApiError;
+  message?: ApiMessage;
+  serverError?: ApiServerError;
+  getData: () => T | undefined;
+  getErrorCode: () => ApiErrorCode | undefined;
+  getErrors: () => ApiErrors | undefined;
+  getMessage: () => ApiMessage | undefined;
+  getError: () => ApiError | undefined;
 }
 
-class ApiResponse<T> implements ApiResponseInterface<T> {
-  private data = <T | null>null;
-  private errorCode: ApiErrorCode = null;
-  private error: ApiError = null;
-  private errors: ApiErrors = null;
-  private message: ApiMessage = "";
-  constructor(response: ApiDataResponse | undefined) {
+type ApiSuccessResponseInterface<T> = Pick<ApiResponseInterface<T>, "getData" | "getMessage">;
+
+type ApiErrorResponseInterface<T> = Pick<
+  ApiResponseInterface<T>,
+  "getErrorCode" | "getErrors" | "getError"
+>;
+
+class ApiResponse<T = any> implements ApiResponseInterface<T> {
+  data?: T;
+  errorCode?: ApiErrorCode;
+  error?: ApiError;
+  errors?: ApiErrors;
+  message?: ApiMessage;
+  serverError?: any;
+  constructor(response: ApiResponse<T>) {
     if (typeof response === "undefined") return;
     this.data = response.data;
     this.error = response.error;
@@ -72,4 +77,61 @@ class ApiResponse<T> implements ApiResponseInterface<T> {
   }
 }
 
-export { ApiResponse };
+class ApiSuccessResponse<T> implements ApiSuccessResponseInterface<T> {
+  data: T;
+  message: ApiMessage;
+
+  constructor(response: ApiSuccessResponse<T>) {
+    this.data = response.data;
+    this.message = response.message;
+  }
+
+  /**
+   * Returns data
+   */
+  getData() {
+    return this.data;
+  }
+
+  /**
+   * Returns message
+   */
+  getMessage() {
+    return this.message;
+  }
+}
+
+class ApiErrorResponse<T> implements ApiErrorResponseInterface<T> {
+  errorCode?: ApiErrorCode;
+  error: ApiError;
+  errors?: ApiErrors;
+  serverError?: any;
+  constructor(response: ApiErrorResponse<T>) {
+    this.error = response.error;
+    this.errorCode = response.errorCode;
+    this.errors = response.errors;
+  }
+
+  /**
+   * Returns Error code
+   */
+  getErrorCode() {
+    return this.errorCode;
+  }
+
+  /**
+   * Returns error
+   */
+  getError() {
+    return this.error;
+  }
+
+  /**
+   * Returns errors
+   */
+  getErrors() {
+    return this.errors;
+  }
+}
+
+export { ApiResponse, ApiSuccessResponse, ApiErrorResponse };

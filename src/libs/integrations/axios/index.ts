@@ -1,26 +1,21 @@
 import { ref, shallowRef } from "vue";
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  RawAxiosRequestConfig,
-  AxiosResponse,
-  CancelTokenSource,
-} from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelTokenSource } from "axios";
 import { _axios } from "./plugin";
-import useErrorResponse from "./useErrorResponse";
+import useErrorResponse, { setHandleUnauthenticated } from "./useErrorResponse";
 import { objectToQueryString } from "./formData";
 
 import type { Ref, ShallowRef } from "vue";
-import type { ApiDataResponse } from "../../core/response";
+import type { ApiResponse } from "../../core/response";
+import type { RawAxiosRequestConfig } from "axios";
 
 export * from "./plugin";
 export * from "./formData";
-
+export { setHandleUnauthenticated };
 // export interface UseAxiosReturn<T> {
 //   /**
 //    * Axios Response
 //    */
-//   response: Ref<ApiDataResponse<T> | undefined>;
+//   response: Ref<ApiResponse<T> | undefined>;
 
 //   /**
 //    * Axios response data
@@ -59,14 +54,11 @@ export * from "./formData";
  * Wrapper for axios.
  * @param url
  */
-export function useAxios<T = any, _D = any, E = any>(
-  url: string,
-  args: RawAxiosRequestConfig
-) {
+export function useAxios<T = any, _D = any, E = any>(url: string, args: RawAxiosRequestConfig) {
   const config: RawAxiosRequestConfig = args;
   const instance: AxiosInstance = _axios;
 
-  const response = ref<ApiDataResponse<T>>();
+  const response = ref<ApiResponse<T>>();
   // const data = shallowRef<T | null>(null)
   const isFinished = ref(false);
   const isLoading = ref(true);
@@ -172,8 +164,7 @@ export async function* useAsyncAxiosGenerator<T = any>(
     if (option && option.deley && option.deley > 0)
       await new Promise((resolve) => setTimeout(resolve, option.deley));
     //@ts-ignore
-    if (option && option.page_size * page >= response.data.data.total)
-      dataFinished = true;
+    if (option && option.page_size * page >= response.data.data.total) dataFinished = true;
   }
 }
 
