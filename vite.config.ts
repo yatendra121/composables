@@ -11,14 +11,16 @@ export default defineConfig({
   },
   define: { "process.env": {} },
   build: {
+    target: "esnext", //esnext/modules
     lib: {
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         axios: resolve(__dirname, "src/axios.ts"),
       },
       // name: "vq-vuetify",
-      fileName: (format, entryName) => `${entryName}.js`,
-      formats: ["es"],
+      fileName: (format, entryName) =>
+        format === "es" ? `${entryName}.js` : `${entryName}.${format}`,
+      formats: ["es", "cjs"],
     },
     rollupOptions: {
       // make sure to externalize deps that shouldn't be bundled

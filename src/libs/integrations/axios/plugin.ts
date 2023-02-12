@@ -3,10 +3,23 @@ import type { AxiosInstance } from "axios";
 
 const cancelToken = axios.CancelToken;
 
-let _axios = axios.create({});
+class AxiosPlugin {
+  // eslint-disable-next-line no-useless-constructor
+  private constructor() {}
+
+  private static instance: AxiosInstance = axios.create({});
+
+  static getInstance(): AxiosInstance {
+    return AxiosPlugin.instance;
+  }
+
+  static setInstance(instance: AxiosInstance): void {
+    this.instance = instance;
+  }
+}
 
 const setAxiosInstance = (instance: AxiosInstance) => {
-  _axios = instance;
+  AxiosPlugin.setInstance(instance);
 };
 
-export { _axios, cancelToken, setAxiosInstance };
+export { AxiosPlugin, cancelToken, setAxiosInstance };

@@ -5,11 +5,7 @@
  * @param {FormData} form
  * @param {String} namespace
  */
-export const objectToFormData = (
-  obj: any,
-  form?: FormData,
-  namespace?: string
-) => {
+export const objectToFormData = (obj: any, form?: FormData, namespace?: string) => {
   const fd = form || new FormData();
   let formKey;
 

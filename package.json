@@ -1,6 +1,6 @@
 {
   "name": "@qnx/composables",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "license": "MIT",
   "author": "Yatendra Kushwaha <yatendra121kushwaha@gmail.com>",
@@ -38,7 +38,7 @@
     "./*": "./*",
     "./axios": {
       "types": "./src/axios.ts",
-      "require": "./src/axios.ts"
+      "import": "./src/axios.ts"
     }
   },
   "typesVersions": {
