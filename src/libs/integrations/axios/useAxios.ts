@@ -8,7 +8,7 @@ import { objectToQueryString } from "./formData";
 import type { Ref } from "vue";
 import type { RawAxiosRequestConfig } from "axios";
 
-export interface UseAxiosReturn<T, E> {
+export interface UseAxiosReturn<T, _E> {
   response: Ref<T | undefined>;
   finished: Ref<boolean>;
   loading: Ref<boolean>;
