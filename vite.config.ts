@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
-//import dts from 'vite-plugin-dts'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +16,6 @@ export default defineConfig({
         index: resolve(__dirname, "src/index.ts"),
         axios: resolve(__dirname, "src/axios.ts"),
       },
-      // name: "vq-vuetify",
       fileName: (format, entryName) =>
         format === "es" ? `${entryName}.js` : `${entryName}.${format}`,
       formats: ["es", "cjs"],
@@ -33,22 +31,4 @@ export default defineConfig({
       },
     },
   },
-  //@ts-ignore
-  test: {
-    /* for example, use global to avoid globals imports (describe, test, expect): */
-    globals: true,
-  },
-  /* remove the need to specify .vue files https://vitejs.dev/config/#resolve-extensions
-  resolve: {
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ]
-  },
-  */
 });

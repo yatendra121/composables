@@ -4,6 +4,9 @@ type ApiMessage = string;
 type ApiError = string;
 type ApiServerError = any;
 
+/**
+ * Created types for response
+ */
 export interface ApiResponseInterface<T = any> {
   data?: T;
   errorCode?: ApiErrorCode;
@@ -36,6 +39,9 @@ export type ApiErrorResponseValue = Pick<
   "errorCode" | "errors" | "error"
 >;
 
+/**
+ * Created for collect all response from server
+ */
 class ApiResponse<T = any> implements ApiResponseInterface<T> {
   data?: T;
   errorCode?: ApiErrorCode;
@@ -88,6 +94,9 @@ class ApiResponse<T = any> implements ApiResponseInterface<T> {
   }
 }
 
+/**
+ * Created for collect success response from server
+ */
 class ApiSuccessResponse<T = any> implements ApiSuccessResponseInterface<T> {
   data: T;
   message: ApiMessage;
@@ -112,6 +121,9 @@ class ApiSuccessResponse<T = any> implements ApiSuccessResponseInterface<T> {
   }
 }
 
+/**
+ * Created for collect error response from server
+ */
 class ApiErrorResponse implements ApiErrorResponseInterface {
   errorCode?: ApiErrorCode;
   error: ApiError;
