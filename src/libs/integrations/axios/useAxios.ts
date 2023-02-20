@@ -4,64 +4,38 @@ import { AxiosPlugin } from "./plugin";
 import useErrorResponse from "./useErrorResponse";
 import { objectToQueryString } from "./formData";
 
-import type { Ref, ShallowRef } from "vue";
-import type { ApiResponse } from "../../core/response";
+//types
+import type { Ref } from "vue";
 import type { RawAxiosRequestConfig } from "axios";
 
-// export interface UseAxiosReturn<T> {
-//   /**
-//    * Axios Response
-//    */
-//   response: Ref<ApiResponse<T> | undefined>;
-
-//   /**
-//    * Axios response data
-//    */
-//   data: Ref<T | undefined>;
-
-//   /**
-//    * Indicates if the request has finished
-//    */
-//   isFinished: Ref<boolean>;
-
-//   /**
-//    * Indicates if the request is currently loading
-//    */
-//   isLoading: Ref<boolean>;
-
-//   /**
-//    * Indicates if the request was canceled
-//    */
-//   aborted: Ref<boolean>;
-
-//   /**
-//    * Any errors that may have occurred
-//    */
-//   error: Ref<AxiosError<T> | undefined>;
-
-//   errorResponse: ShallowRef<T | undefined>;
-
-//   /**
-//    * Aborts the current request
-//    */
-//   abort: (message?: string | undefined) => void;
-// }
+export interface UseAxiosReturn<T, E> {
+  response: Ref<T | undefined>;
+  finished: Ref<boolean>;
+  loading: Ref<boolean>;
+  isFinished: Ref<boolean>;
+  isLoading: Ref<boolean>;
+  cancel: (message?: string) => void;
+  canceled: Ref<boolean>;
+  aborted: Ref<boolean>;
+  abort: (message?: string) => void;
+}
 
 /**
- * Wrapper for axios.
+ * axios.
  * @param url
  */
-export function useAxios<T = any, _D = any, E = any>(url: string, args: RawAxiosRequestConfig) {
+export function useAxios<T = any, _D = any, E = any>(
+  url: string,
+  args: RawAxiosRequestConfig
+): UseAxiosReturn<T, E> {
   const config: RawAxiosRequestConfig = args;
   const instance: AxiosInstance = AxiosPlugin.getInstance();
 
-  const response = ref<ApiResponse<T>>();
-  // const data = shallowRef<T | null>(null)
+  const response = ref<T>();
   const isFinished = ref(false);
   const isLoading = ref(true);
   const aborted = ref(false);
   const errorResponse = shallowRef<E>();
-  //const error = shallowRef<AxiosError<E>>()
 
   const cancelToken: CancelTokenSource = axios.CancelToken.source();
   const abort = (message?: string) => {
@@ -74,15 +48,14 @@ export function useAxios<T = any, _D = any, E = any>(url: string, args: RawAxios
   };
 
   instance<T>(url, { ...config, cancelToken: cancelToken.token })
-    .then((res: AxiosResponse["data"]) => {
-      response.value = res;
-      // data.value = r.data
+    .then((res) => {
+      response.value = res.data;
     })
     .catch(async (e: AxiosError<E>) => {
+      console.log({ e });
       const { getErrorResponse } = useErrorResponse();
       const { eResponse } = await getErrorResponse<E>(e);
       errorResponse.value = eResponse.value;
-      //error.value = e
     })
     .finally(() => {
       isLoading.value = false;
@@ -91,8 +64,6 @@ export function useAxios<T = any, _D = any, E = any>(url: string, args: RawAxios
 
   return {
     response,
-    // data,
-    // error,
     finished: isFinished,
     loading: isLoading,
     isFinished,
@@ -117,10 +88,11 @@ export async function useAsyncAxios<T = any>(
   const { cancelToken } = option;
 
   try {
-    return (await instance<T>(url, {
+    const res = await instance<T>(url, {
       ...config,
       cancelToken: cancelToken.token,
-    })) as AxiosResponse<T>["data"];
+    });
+    return res.data;
   } catch (e: unknown) {
     const err = e as AxiosError<T>;
     return Promise.reject(err);

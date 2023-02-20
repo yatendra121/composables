@@ -23,9 +23,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@/*": ["src/*"],
-      "types": ["node", "vitest/globals"]
-    }
+      "@/*": ["src/*"]
+    },
+    "types": ["vitest/globals"]
   },
   "include": ["src/index.ts", "src/axios.ts"]
 }

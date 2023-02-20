@@ -13,7 +13,8 @@
     "build": "vite build && vue-tsc --pretty  --declaration --emitDeclarationOnly",
     "dev": "vite",
     "build:types": "rollup --config build/rollup.types.config.js",
-    "build-force": "pnpm build && pnpm build:types"
+    "build-force": "pnpm build && pnpm build:types",
+    "test:unit": "vitest"
   },
   "files": [
     "dist"

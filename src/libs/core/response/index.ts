@@ -18,11 +18,22 @@ export interface ApiResponseInterface<T = any> {
   getError: () => ApiError | undefined;
 }
 
-type ApiSuccessResponseInterface<T> = Pick<ApiResponseInterface<T>, "getData" | "getMessage">;
+type ApiSuccessResponseInterface<T> = Required<
+  Pick<ApiResponseInterface<T>, "data" | "message" | "getData" | "getMessage">
+>;
 
-type ApiErrorResponseInterface<T> = Pick<
-  ApiResponseInterface<T>,
+export type ApiSuccessResponseValue<T> = Pick<ApiSuccessResponseInterface<T>, "data" | "message">;
+
+type ApiErrorResponseInterface = Pick<
+  ApiResponseInterface,
   "getErrorCode" | "getErrors" | "getError"
+> &
+  Pick<ApiResponseInterface, "errorCode" | "errors"> &
+  Required<Pick<ApiResponseInterface, "error">>;
+
+export type ApiErrorResponseValue = Pick<
+  ApiErrorResponseInterface,
+  "errorCode" | "errors" | "error"
 >;
 
 class ApiResponse<T = any> implements ApiResponseInterface<T> {
@@ -77,11 +88,11 @@ class ApiResponse<T = any> implements ApiResponseInterface<T> {
   }
 }
 
-class ApiSuccessResponse<T> implements ApiSuccessResponseInterface<T> {
+class ApiSuccessResponse<T = any> implements ApiSuccessResponseInterface<T> {
   data: T;
   message: ApiMessage;
 
-  constructor(response: ApiSuccessResponse<T>) {
+  constructor(response: ApiSuccessResponseValue<T>) {
     this.data = response.data;
     this.message = response.message;
   }
@@ -101,12 +112,12 @@ class ApiSuccessResponse<T> implements ApiSuccessResponseInterface<T> {
   }
 }
 
-class ApiErrorResponse<T> implements ApiErrorResponseInterface<T> {
+class ApiErrorResponse implements ApiErrorResponseInterface {
   errorCode?: ApiErrorCode;
   error: ApiError;
   errors?: ApiErrors;
   serverError?: any;
-  constructor(response: ApiErrorResponse<T>) {
+  constructor(response: ApiErrorResponseValue) {
     this.error = response.error;
     this.errorCode = response.errorCode;
     this.errors = response.errors;
