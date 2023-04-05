@@ -4,157 +4,98 @@ type ApiMessage = string;
 type ApiError = string;
 type ApiServerError = any;
 
-/**
- * Created types for response
- */
-export interface ApiResponseInterface<T = any> {
-  data?: T;
-  errorCode?: ApiErrorCode;
-  errors?: ApiErrors;
-  error?: ApiError;
-  message?: ApiMessage;
-  serverError?: ApiServerError;
-  getData: () => T | undefined;
-  getErrorCode: () => ApiErrorCode | undefined;
-  getErrors: () => ApiErrors | undefined;
-  getMessage: () => ApiMessage | undefined;
-  getError: () => ApiError | undefined;
+interface ApiResponseInterface<T> {
+    getData: () => T | undefined;
+    getMessage: () => ApiMessage | undefined;
+    getErrorCode(): ApiErrorCode | undefined;
+    getErrors(): ApiErrors | undefined;
+    getError(): ApiError | undefined;
 }
 
-type ApiSuccessResponseInterface<T> = Required<
-  Pick<ApiResponseInterface<T>, "data" | "message" | "getData" | "getMessage">
->;
-
-export type ApiSuccessResponseValue<T> = Pick<ApiSuccessResponseInterface<T>, "data" | "message">;
-
-type ApiErrorResponseInterface = Pick<
-  ApiResponseInterface,
-  "getErrorCode" | "getErrors" | "getError"
-> &
-  Pick<ApiResponseInterface, "errorCode" | "errors"> &
-  Required<Pick<ApiResponseInterface, "error">>;
-
-export type ApiErrorResponseValue = Pick<
-  ApiErrorResponseInterface,
-  "errorCode" | "errors" | "error"
->;
-
-/**
- * Created for collect all response from server
- */
-class ApiResponse<T = any> implements ApiResponseInterface<T> {
-  data?: T;
-  errorCode?: ApiErrorCode;
-  error?: ApiError;
-  errors?: ApiErrors;
-  message?: ApiMessage;
-  serverError?: any;
-  constructor(response: ApiResponse<T>) {
-    if (typeof response === "undefined") return;
-    this.data = response.data;
-    this.error = response.error;
-    this.errorCode = response.errorCode;
-    this.errors = response.errors;
-    this.message = response.message;
-  }
-
-  /**
-   * Returns data
-   */
-  getData() {
-    return this.data;
-  }
-
-  /**
-   * Returns Error code
-   */
-  getErrorCode() {
-    return this.errorCode;
-  }
-
-  /**
-   * Returns error
-   */
-  getError() {
-    return this.error;
-  }
-
-  /**
-   * Returns errors
-   */
-  getErrors() {
-    return this.errors;
-  }
-
-  /**
-   * Returns message
-   */
-  getMessage() {
-    return this.message;
-  }
+interface ApiResponseValue<T> {
+    readonly data?: T;
+    readonly errorCode?: ApiErrorCode;
+    readonly error?: ApiError;
+    readonly errors?: ApiErrors;
+    readonly message?: ApiMessage;
+    readonly serverError?: any;
 }
 
 /**
- * Created for collect success response from server
+ * Will use collect data from api response
  */
-class ApiSuccessResponse<T = any> implements ApiSuccessResponseInterface<T> {
-  data: T;
-  message: ApiMessage;
+class ApiResponse<T> implements ApiResponseInterface<T> {
+    constructor(private readonly response: ApiResponseValue<T> = {}) {}
 
-  constructor(response: ApiSuccessResponseValue<T>) {
-    this.data = response.data;
-    this.message = response.message;
-  }
+    getErrorCode(): ApiErrorCode | undefined {
+        return this.response.errorCode;
+    }
 
-  /**
-   * Returns data
-   */
-  getData() {
-    return this.data;
-  }
+    getErrors(): ApiErrors | undefined {
+        return this.response.errors;
+    }
 
-  /**
-   * Returns message
-   */
-  getMessage() {
-    return this.message;
-  }
+    getError(): ApiError | undefined {
+        return this.response.error;
+    }
+
+    getMessage(): ApiMessage | undefined {
+        return this.response.message;
+    }
+
+    getData(): T | undefined {
+        return this.response.data;
+    }
 }
 
+interface ApiSuccessResponseInterface<T> {
+    getData: () => T;
+    getMessage: () => ApiMessage;
+}
+
+type ApiSuccessResponseValue<T> = Pick<Required<ApiResponseValue<T>>, "data" | "message">;
+
 /**
- * Created for collect error response from server
+ * Will use collect data from success api response
+ */
+class ApiSuccessResponse<T> implements ApiSuccessResponseInterface<T> {
+    constructor(private readonly response: ApiSuccessResponseValue<T>) {}
+
+    getData(): T {
+        return this.response.data;
+    }
+
+    getMessage(): ApiMessage {
+        return this.response.message;
+    }
+}
+
+interface ApiErrorResponseInterface {
+    getError: () => string;
+    getErrors: () => Record<string, string[]> | undefined;
+    getErrorCode: () => string | undefined;
+}
+
+type ApiErrorResponseValue = Pick<Required<ApiResponseValue<unknown>>, "errors" | "error"> &
+    Pick<ApiResponseValue<unknown>, "errorCode">;
+
+/**
+ * Will use collect data from error api response
  */
 class ApiErrorResponse implements ApiErrorResponseInterface {
-  errorCode?: ApiErrorCode;
-  error: ApiError;
-  errors?: ApiErrors;
-  serverError?: any;
-  constructor(response: ApiErrorResponseValue) {
-    this.error = response.error;
-    this.errorCode = response.errorCode;
-    this.errors = response.errors;
-  }
+    constructor(private readonly response: ApiErrorResponseValue) {}
 
-  /**
-   * Returns Error code
-   */
-  getErrorCode() {
-    return this.errorCode;
-  }
+    getError() {
+        return this.response.error;
+    }
 
-  /**
-   * Returns error
-   */
-  getError() {
-    return this.error;
-  }
+    getErrors() {
+        return this.response.errors;
+    }
 
-  /**
-   * Returns errors
-   */
-  getErrors() {
-    return this.errors;
-  }
+    getErrorCode() {
+        return this.response.errorCode;
+    }
 }
 
 export { ApiResponse, ApiSuccessResponse, ApiErrorResponse };

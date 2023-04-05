@@ -1,6 +1,6 @@
 {
     "name": "@qnx/composables",
-    "version": "0.0.16",
+    "version": "0.0.20",
     "type": "module",
     "license": "MIT",
     "author": "Yatendra Kushwaha <yatendra121kushwaha@gmail.com>",

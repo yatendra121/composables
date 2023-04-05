@@ -2,111 +2,198 @@ import { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from "./response";
 import { describe, beforeEach, test, expect, it } from "vitest";
 
 describe("ApiResponse", () => {
-  let response: ApiResponse<unknown>;
-  beforeEach(() => {
-    response = new ApiResponse({
-      data: "test data",
-      errorCode: "errorCode",
-      errors: { error: ["test error"] },
-      error: "test error",
-      message: "test message",
-      serverError: "test serverError",
+    it("constructor initializes response object", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse).toBeDefined();
+        expect(apiResponse.getData()).toBeUndefined();
+        expect(apiResponse.getErrorCode()).toBeUndefined();
+        expect(apiResponse.getError()).toBeUndefined();
+        expect(apiResponse.getErrors()).toBeUndefined();
+        expect(apiResponse.getMessage()).toBeUndefined();
     });
-  });
-  test("getData should return the data property", () => {
-    expect(response.getData()).toBe("test data");
-  });
-  test("getErrorCode should return the errorCode property", () => {
-    expect(response.getErrorCode()).toBe("errorCode");
-  });
-  test("getError should return the error property", () => {
-    expect(response.getError()).toBe("test error");
-  });
-  test("getErrors should return the errors property", () => {
-    expect(response.getErrors()).toEqual({ error: ["test error"] });
-  });
-  test("getMessage should return the message property", () => {
-    expect(response.getMessage()).toBe("test message");
-  });
+
+    it("getData method returns correct data", () => {
+        const data = "test data";
+        const apiResponse = new ApiResponse<string>({ data });
+        expect(apiResponse.getData()).toEqual(data);
+    });
+
+    it("getErrorCode method returns correct error code", () => {
+        const errorCode = "test error code";
+        const apiResponse = new ApiResponse({ errorCode });
+        expect(apiResponse.getErrorCode()).toEqual(errorCode);
+    });
+
+    it("getError method returns correct error message", () => {
+        const error = "test error message";
+        const apiResponse = new ApiResponse({ error });
+        expect(apiResponse.getError()).toEqual(error);
+    });
+
+    it("getErrors method returns correct errors object", () => {
+        const errors = { field1: ["error message 1"], field2: ["error message 2"] };
+        const apiResponse = new ApiResponse({ errors });
+        expect(apiResponse.getErrors()).toEqual(errors);
+    });
+
+    it("getMessage method returns correct message", () => {
+        const message = "test message";
+        const apiResponse = new ApiResponse({ message });
+        expect(apiResponse.getMessage()).toEqual(message);
+    });
+
+    it("getData method returns undefined when data is not defined", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse.getData()).toBeUndefined();
+    });
+
+    it("getErrorCode method returns undefined when errorCode is not defined", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse.getErrorCode()).toBeUndefined();
+    });
+
+    it("getError method returns undefined when error is not defined", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse.getError()).toBeUndefined();
+    });
+
+    it("getErrors method returns undefined when errors is not defined", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse.getErrors()).toBeUndefined();
+    });
+
+    it("getMessage method returns undefined when message is not defined", () => {
+        const apiResponse = new ApiResponse();
+        expect(apiResponse.getMessage()).toBeUndefined();
+    });
+
+    it("ApiResponse instance returns undefined when response object is not defined", () => {
+        const apiResponse = new ApiResponse(undefined);
+        expect(apiResponse.getData()).toBeUndefined();
+        expect(apiResponse.getErrorCode()).toBeUndefined();
+        expect(apiResponse.getError()).toBeUndefined();
+        expect(apiResponse.getErrors()).toBeUndefined();
+        expect(apiResponse.getMessage()).toBeUndefined();
+    });
 });
 
 describe("ApiSuccessResponse", () => {
-  const data = { id: 1, name: "test" };
-  const message = "Success";
+    describe("getData", () => {
+        it("returns the data when it exists", () => {
+            const apiSuccessResponse = new ApiSuccessResponse<number>({
+                data: 42,
+                message: "Success"
+            });
+            expect(apiSuccessResponse.getData()).toEqual(42);
+        });
+    });
 
-  it("should create an instance with data and message", () => {
-    const response = new ApiSuccessResponse({ data, message });
-    expect(response.getData()).toEqual(data);
-    expect(response.getMessage()).toEqual(message);
-  });
+    it("returns the data when it exists, even with heavy data", () => {
+        const heavyData: string[] = [];
 
-  it("should return data as undefined if not provided", () => {
-    const response = new ApiSuccessResponse({ message });
-    expect(response.getData()).toBeUndefined();
-    expect(response.getMessage()).toEqual(message);
-  });
+        // Generate a large amount of data
+        for (let i = 0; i < 100000; i++) {
+            heavyData.push(`Data item ${i}`);
+        }
 
-  it("should return message as undefined if not provided", () => {
-    const response = new ApiSuccessResponse({ data });
-    expect(response.getData()).toEqual(data);
-    expect(response.getMessage()).toBeUndefined();
-  });
+        const apiSuccessResponse = new ApiSuccessResponse<string[]>({
+            data: heavyData,
+            message: "Success"
+        });
+
+        expect(apiSuccessResponse.getData()).toEqual(heavyData);
+    });
+
+    describe("getMessage", () => {
+        it("returns the message when it exists", () => {
+            const apiSuccessResponse = new ApiSuccessResponse<number>({
+                data: 42,
+                message: "Success"
+            });
+            expect(apiSuccessResponse.getMessage()).toEqual("Success");
+        });
+    });
 });
 
 describe("ApiErrorResponse", () => {
-  describe("constructor", () => {
-    it("should set the error property", () => {
-      const response = { error: "example error" };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.error).toEqual("example error");
+    describe("getError", () => {
+        it("returns the error message when it exists", () => {
+            const response = {
+                error: "Something went wrong",
+                errors: {}
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
+
+            const result = apiErrorResponse.getError();
+
+            expect(result).toEqual("Something went wrong");
+        });
+
+        it("returns undefined when the error message does not exist", () => {
+            const response = {
+                errors: {}
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
+
+            const result = apiErrorResponse.getError();
+
+            expect(result).toBeUndefined();
+        });
     });
 
-    it("should set the errorCode property", () => {
-      const response = { error: "example error", errorCode: 123 };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.errorCode).toEqual(123);
+    describe("getErrors", () => {
+        it("returns the error messages when they exist", () => {
+            const response = {
+                error: "Something went wrong",
+                errors: {
+                    email: ["Email is required", "Email format is invalid"]
+                }
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
+
+            const result = apiErrorResponse.getErrors();
+
+            expect(result).toEqual({
+                email: ["Email is required", "Email format is invalid"]
+            });
+        });
+
+        it("returns undefined when the error messages do not exist", () => {
+            const response = {
+                error: "Something went wrong"
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
+
+            const result = apiErrorResponse.getErrors();
+
+            expect(result).toBeUndefined();
+        });
     });
 
-    it("should set the errors property", () => {
-      const response = { error: "example error", errors: ["example error 1", "example error 2"] };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.errors).toEqual(["example error 1", "example error 2"]);
-    });
-  });
+    describe("getErrorCode", () => {
+        it("returns the error code when it exists", () => {
+            const response = {
+                errorCode: "400",
+                error: "Something went wrong",
+                errors: {}
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
 
-  describe("getErrorCode", () => {
-    it("should return the error code", () => {
-      const response = { error: "example error", errorCode: 123 };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.getErrorCode()).toEqual(123);
-    });
+            const result = apiErrorResponse.getErrorCode();
 
-    it("should return undefined if errorCode is not set", () => {
-      const response = { error: "example error" };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.getErrorCode()).toBeUndefined();
-    });
-  });
+            expect(result).toEqual("400");
+        });
 
-  describe("getError", () => {
-    it("should return the error", () => {
-      const response = { error: "example error" };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.getError()).toEqual("example error");
-    });
-  });
+        it("returns undefined when the error code does not exist", () => {
+            const response = {
+                error: "Something went wrong",
+                errors: {}
+            };
+            const apiErrorResponse = new ApiErrorResponse(response);
 
-  describe("getErrors", () => {
-    it("should return the errors", () => {
-      const response = { error: "example error", errors: ["example error 1", "example error 2"] };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.getErrors()).toEqual(["example error 1", "example error 2"]);
-    });
+            const result = apiErrorResponse.getErrorCode();
 
-    it("should return undefined if errors are not set", () => {
-      const response = { error: "example error" };
-      const apiErrorResponse = new ApiErrorResponse(response);
-      expect(apiErrorResponse.getErrors()).toBeUndefined();
+            expect(result).toBeUndefined();
+        });
     });
-  });
 });
