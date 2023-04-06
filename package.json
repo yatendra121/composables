@@ -78,8 +78,7 @@
                     "dist/axios.d.ts"
                 ]
             }
-        },
-        "registry": "https://github.com/yatendra121/composables.git"
+        }
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.0.0",
