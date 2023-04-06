@@ -1,5 +1,5 @@
-import { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from "./response";
-import { describe, beforeEach, test, expect, it } from "vitest";
+import { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from "../response";
+import { describe, expect, it } from "vitest";
 
 describe("ApiResponse", () => {
     it("constructor initializes response object", () => {
