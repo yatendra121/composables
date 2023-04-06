@@ -1,6 +1,6 @@
 {
     "name": "@qnx/composables",
-    "version": "0.0.20",
+    "version": "0.0.21",
     "type": "module",
     "license": "MIT",
     "author": "Yatendra Kushwaha <yatendra121kushwaha@gmail.com>",
@@ -78,7 +78,8 @@
                     "dist/axios.d.ts"
                 ]
             }
-        }
+        },
+        "registry": "https://github.com/yatendra121/composables.git"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^4.0.0",

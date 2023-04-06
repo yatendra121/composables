@@ -12,7 +12,7 @@ interface ApiResponseInterface<T> {
     getError(): ApiError | undefined;
 }
 
-interface ApiResponseValue<T> {
+export interface ApiResponseValue<T> {
     readonly data?: T;
     readonly errorCode?: ApiErrorCode;
     readonly error?: ApiError;
@@ -53,7 +53,7 @@ interface ApiSuccessResponseInterface<T> {
     getMessage: () => ApiMessage;
 }
 
-type ApiSuccessResponseValue<T> = Pick<Required<ApiResponseValue<T>>, "data" | "message">;
+export type ApiSuccessResponseValue<T> = Pick<Required<ApiResponseValue<T>>, "data" | "message">;
 
 /**
  * Will use collect data from success api response
@@ -76,7 +76,7 @@ interface ApiErrorResponseInterface {
     getErrorCode: () => string | undefined;
 }
 
-type ApiErrorResponseValue = Pick<Required<ApiResponseValue<unknown>>, "errors" | "error"> &
+export type ApiErrorResponseValue = Pick<Required<ApiResponseValue<unknown>>, "errors" | "error"> &
     Pick<ApiResponseValue<unknown>, "errorCode">;
 
 /**
