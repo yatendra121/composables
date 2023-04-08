@@ -12,7 +12,7 @@ interface ApiResponseInterface<T> {
     getError(): ApiError | undefined;
 }
 
-export interface ApiResponseValue<T> {
+export interface ApiResponseValue<T = any> {
     readonly data?: T;
     readonly errorCode?: ApiErrorCode;
     readonly error?: ApiError;
@@ -24,7 +24,7 @@ export interface ApiResponseValue<T> {
 /**
  * Will use collect data from api response
  */
-class ApiResponse<T> implements ApiResponseInterface<T> {
+class ApiResponse<T = any> implements ApiResponseInterface<T> {
     constructor(private readonly response: ApiResponseValue<T> = {}) {}
 
     getErrorCode(): ApiErrorCode | undefined {
