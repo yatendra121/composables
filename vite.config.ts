@@ -1,14 +1,16 @@
+/// <reference types="vitest" />
+
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-// https://vitejs.dev/config/
-/// <reference types="vitest" />
 export default defineConfig({
     resolve: {
         alias: {
             "@": resolve(__dirname, "./src")
         }
     },
+    plugins: [tsconfigPaths()],
     define: { "process.env": {} },
     build: {
         target: "esnext", //esnext/modules
@@ -24,7 +26,7 @@ export default defineConfig({
         rollupOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library
-            external: ["axios", "vue"],
+            external: ["axios", "vue", "@qnx/composables"],
             output: {
                 //format: 'esm',
                 // Provide global variables to use in the UMD build
