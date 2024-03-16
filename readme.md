@@ -52,7 +52,7 @@ const queryString = objectToQueryString({
 
 ### Integration Features
 
-useAxios: Collects reactive data and the status of a request.
+**useAxios:** Collects reactive data and the status of a request.
 
 ```bash
 import { useAxios  } from '@qnx/composables/axios'
@@ -60,7 +60,7 @@ import { useAxios  } from '@qnx/composables/axios'
 const { response, loading, cancel } = useAxios('/user', { method: 'GET' })
 ```
 
-useAsyncAxios: Collects data from a request asynchronously.
+**useAsyncAxios:** Collects data from a request asynchronously.
 
 ```bash
 import { useAsyncAxios  } from '@qnx/composables/axios'
