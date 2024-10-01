@@ -29,6 +29,7 @@ export const objectToFormData = (obj: any, form?: FormData, namespace?: string) 
             } else {
                 // if it's a string or a File object
                 if (obj[property] instanceof Blob && obj[property]) {
+                    //@ts-ignore
                     fd.append(formKey, obj[property], obj[property].name);
                 } else if (obj[property]) {
                     fd.append(formKey, obj[property]);
