@@ -2,7 +2,8 @@ import { ref, shallowRef } from "vue";
 import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelTokenSource } from "axios";
 import { AxiosPlugin } from "./plugin";
 import useErrorResponse from "./useErrorResponse";
-import { objectToQueryString } from "@qnx/composables";
+import { objectToQueryString } from "../../core/form";
+//import { objectToQueryString } from "@qnx/composables";
 
 //types
 import type { Ref } from "vue";
