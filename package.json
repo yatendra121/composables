@@ -1,5 +1,6 @@
 {
     "name": "@qnx/composables",
+    "description": "Collection of basic Vue Composition Utilities",
     "version": "0.6.15",
     "type": "module",
     "license": "MIT",
@@ -8,6 +9,7 @@
         "type": "git",
         "url": "https://github.com/yatendra121/composables.git"
     },
+    "funding": "https://github.com/sponsors/yatendra121",
     "scripts": {
         "serve": "vite preview",
         "build": "vite build && vue-tsc --pretty  --declaration --emitDeclarationOnly",
@@ -25,7 +27,7 @@
     "keywords": [
         "composables",
         "utils",
-        "vue"
+        "vue3"
     ],
     "sideEffects": false,
     "main": "./src/index.ts",
