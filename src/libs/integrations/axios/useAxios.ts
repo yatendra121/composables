@@ -49,6 +49,8 @@ export function useAxios<T = any, _D = any, E = any>(
     };
 
     console.log("---------Composable: UseAxios-----------");
+    console.log({ instance });
+    console.log({ uri: instance.getUri() });
     console.log({ url, config });
     instance<T>(url, { ...config, cancelToken: cancelToken.token })
         .then((res) => {
@@ -89,6 +91,11 @@ export async function useAsyncAxios<T = any>(
     const instance: AxiosInstance = AxiosPlugin.getInstance();
 
     const { cancelToken } = option;
+
+    console.log("---------Composable: useAsyncAxios-----------");
+    console.log({ instance });
+    console.log({ uri: instance.getUri() });
+    console.log({ url, config });
 
     try {
         const res = await instance<T>(url, {
