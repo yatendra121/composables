@@ -1,3 +1,9 @@
+## 0.6.21 (2024-12-06)
+
+Bugs
+
+- build: typescript version conflict
+
 ## 0.6.20 (2024-12-06)
 
 Features
