@@ -48,6 +48,8 @@ export function useAxios<T = any, _D = any, E = any>(
         isFinished.value = false;
     };
 
+    console.log("---------Composable: UseAxios-----------");
+    console.log({ url, config });
     instance<T>(url, { ...config, cancelToken: cancelToken.token })
         .then((res) => {
             response.value = res.data;
