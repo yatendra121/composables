@@ -1,7 +1,7 @@
 {
     "name": "@qnx/composables",
     "description": "Collection of basic Vue Composition Utilities",
-    "version": "0.6.22",
+    "version": "0.7.0",
     "type": "module",
     "license": "MIT",
     "author": "Yatendra Kushwaha <yatendra121kushwaha@gmail.com>",
