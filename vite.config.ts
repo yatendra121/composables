@@ -2,15 +2,15 @@
 
 import { defineConfig } from "vite";
 import { resolve } from "path";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
     resolve: {
         alias: {
             "@": resolve(__dirname, "./src")
-        }
+        },
+        tsconfigPaths: true
     },
-    plugins: [tsconfigPaths()],
+    plugins: [],
     define: { "process.env": {} },
     build: {
         target: "esnext", //esnext/modules
@@ -23,7 +23,7 @@ export default defineConfig({
                 format === "es" ? `${entryName}.js` : `${entryName}.${format}`,
             formats: ["es", "cjs"]
         },
-        rollupOptions: {
+        rolldownOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library
             external: ["axios", "vue", "@qnx/composables"],
