@@ -83,6 +83,7 @@
         }
     },
     "devDependencies": {
+        "@qnx/client": "^0.8.0",
         "@types/micromatch": "^4.0.9",
         "@vitejs/plugin-vue": "^6.0.0",
         "axios": "^1.10.0",
