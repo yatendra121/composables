@@ -1,20 +1,21 @@
 import { shallowRef } from "vue";
 import type { AxiosError } from "axios";
 
-function isPromise(promise: any) {
-    return !!promise && typeof promise.then === "function";
+function isPromise(value: unknown): value is Promise<unknown> {
+    return !!value && typeof (value as Promise<unknown>).then === "function";
 }
 
-const executeFuncation = (fun: () => void | Promise<() => void>) => {
-    if (isPromise(fun)) {
-        //@ts-ignore
-        fun().then(() => console.log("promise unauthentication handler executed"));
-    } else fun();
+const executeFunction = (fun: () => void | Promise<void>) => {
+    const result = fun();
+    if (isPromise(result)) {
+        result.then(() => console.log("promise unauthentication handler executed"));
+    }
 };
 
-let unauthenticationError = () => console.log("no unauthenticate handled");
+let unauthenticationError: () => void | Promise<void> = () =>
+    console.log("no unauthenticate handled");
 
-export const setHandleUnauthenticated = (fun: () => void | Promise<() => void>) => {
+export const setHandleUnauthenticated = (fun: () => void | Promise<void>) => {
     unauthenticationError = fun;
 };
 
@@ -31,7 +32,7 @@ export default function useErrorResponse() {
             if ([400, 422].includes(status.value)) {
                 errorResponse.value = r.data;
             } else if ([401].includes(status.value)) {
-                executeFuncation(unauthenticationError);
+                executeFunction(unauthenticationError);
             } else if ([405, 404].includes(status.value)) {
                 throw new Error(response.message);
             } else {

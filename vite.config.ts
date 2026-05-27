@@ -7,8 +7,7 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": resolve(__dirname, "./src")
-        },
-        tsconfigPaths: true
+        }
     },
     plugins: [],
     define: { "process.env": {} },

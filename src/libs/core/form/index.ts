@@ -9,8 +9,7 @@ export const objectToFormData = (obj: any, form?: FormData, namespace?: string) 
     let formKey;
 
     for (const property in obj) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (obj.hasOwnProperty(property)) {
+        if (Object.hasOwn(obj, property)) {
             if (namespace) {
                 formKey = namespace + "[" + property + "]";
             } else {
@@ -27,9 +26,7 @@ export const objectToFormData = (obj: any, form?: FormData, namespace?: string) 
             ) {
                 objectToFormData(obj[property], fd, formKey);
             } else {
-                // if it's a string or a File object
-                if (obj[property] instanceof Blob && obj[property]) {
-                    //@ts-ignore
+                if (obj[property] instanceof File) {
                     fd.append(formKey, obj[property], obj[property].name);
                 } else if (obj[property]) {
                     fd.append(formKey, obj[property]);
@@ -47,12 +44,10 @@ export const objectToFormData = (obj: any, form?: FormData, namespace?: string) 
  * @param prefix
  */
 export const objectToQueryString = (obj: any, prefix?: string): string => {
-    const str = [];
-    let p;
+    const str: string[] = [];
 
-    for (p in obj) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (obj.hasOwnProperty(p)) {
+    for (const p in obj) {
+        if (Object.hasOwn(obj, p)) {
             const k = prefix ? prefix + "[" + p + "]" : p;
             const v = obj[p];
             const value =
@@ -60,7 +55,6 @@ export const objectToQueryString = (obj: any, prefix?: string): string => {
                     ? objectToQueryString(v, k)
                     : encodeURIComponent(k) + "=" + encodeURIComponent(v || "");
             if (value) {
-                //@ts-ignore
                 str.push(value);
             }
         }

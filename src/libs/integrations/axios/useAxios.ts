@@ -1,16 +1,16 @@
 import { ref, shallowRef } from "vue";
-import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelTokenSource } from "axios";
+import axios, { AxiosError, AxiosInstance, CancelTokenSource } from "axios";
 import { AxiosPlugin } from "./plugin";
 import useErrorResponse from "./useErrorResponse";
 import { objectToQueryString } from "../../core/form";
-//import { objectToQueryString } from "@qnx/composables";
 
 //types
 import type { Ref } from "vue";
 import type { RawAxiosRequestConfig } from "axios";
 
-export interface UseAxiosReturn<T, _E> {
+export interface UseAxiosReturn<T, E> {
     response: Ref<T | undefined>;
+    errorResponse: Ref<E | undefined>;
     finished: Ref<boolean>;
     loading: Ref<boolean>;
     isFinished: Ref<boolean>;
@@ -48,16 +48,12 @@ export function useAxios<T = any, _D = any, E = any>(
         isFinished.value = false;
     };
 
-    console.log("---------Composable: UseAxios-----------");
-    console.log({ instance });
-    console.log({ uri: instance.getUri() });
-    console.log({ url, config });
     instance<T>(url, { ...config, cancelToken: cancelToken.token })
         .then((res) => {
             response.value = res.data;
         })
         .catch(async (e: AxiosError<E>) => {
-            console.log({ e });
+            if (axios.isCancel(e)) return;
             const { getErrorResponse } = useErrorResponse();
             const { eResponse } = await getErrorResponse<E>(e);
             errorResponse.value = eResponse.value;
@@ -69,6 +65,7 @@ export function useAxios<T = any, _D = any, E = any>(
 
     return {
         response,
+        errorResponse,
         finished: isFinished,
         loading: isLoading,
         isFinished,
@@ -92,11 +89,6 @@ export async function useAsyncAxios<T = any>(
 
     const { cancelToken } = option;
 
-    console.log("---------Composable: useAsyncAxios-----------");
-    console.log({ instance });
-    console.log({ uri: instance.getUri() });
-    console.log({ url, config });
-
     try {
         const res = await instance<T>(url, {
             ...config,
@@ -116,7 +108,7 @@ export async function* useAsyncAxiosGenerator<T = any>(
         queryParams?: any;
         page_size: number;
         page?: number;
-        deley?: number;
+        delay?: number;
     } = {
         page_size: 10
     }
@@ -126,8 +118,7 @@ export async function* useAsyncAxiosGenerator<T = any>(
     let response;
     let dataFinished = false;
     while (nextPage !== 0 && !dataFinished) {
-        console.log({ page });
-        option.queryParams.page = page;
+        if (option.queryParams) option.queryParams.page = page;
         try {
             response = await useAsyncAxios<T>(
                 `${url}?${objectToQueryString(option.queryParams, "")}`,
@@ -138,10 +129,10 @@ export async function* useAsyncAxiosGenerator<T = any>(
         }
 
         nextPage = yield response;
-        page = nextPage ?? ++page;
+        page = nextPage ?? page + 1;
 
-        if (option && option.deley && option.deley > 0)
-            await new Promise((resolve) => setTimeout(resolve, option.deley));
+        if (option && option.delay && option.delay > 0)
+            await new Promise((resolve) => setTimeout(resolve, option.delay));
         //@ts-ignore
         if (option && option.page_size * page >= response.data.data.total) dataFinished = true;
     }
