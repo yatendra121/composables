@@ -1,3 +1,23 @@
+## 0.8.1 (2026-05-27)
+
+Features
+
+- useAxios: expose errorResponse ref in UseAxiosReturn interface
+
+Bugs
+
+- useErrorResponse: fix dead async path in executeFunction; async 401 handlers were never awaited
+- useErrorResponse: fix wrong type Promise<() => void> → Promise<void>
+- useAxios: guard cancel errors in catch to prevent unhandled promise rejections on abort
+- useAxios: fix null access on optional queryParams in useAsyncAxiosGenerator
+- useAxios: remove debug console.log statements; rename deley → delay
+- form: fix str inferred as never[]; replace hasOwnProperty with Object.hasOwn; fix Blob/File append logic
+- vite.config: remove invalid tsconfigPaths from resolve options
+
+Chore
+
+- deps: update devDependencies to latest versions
+
 ## 0.8.0 (2026-04-05)
 
 Features
