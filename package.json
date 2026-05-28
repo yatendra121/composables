@@ -12,10 +12,8 @@
     "funding": "https://github.com/sponsors/yatendra121",
     "scripts": {
         "serve": "vite preview",
-        "build": "vite build && vue-tsc --pretty  --declaration --emitDeclarationOnly",
+        "build": "vite build",
         "dev": "vite",
-        "build:types": "rollup --config build/rollup.types.config.js",
-        "build-force": "pnpm build && pnpm build:types",
         "test:unit": "vitest"
     },
     "files": [
@@ -83,22 +81,19 @@
         }
     },
     "devDependencies": {
+        "@microsoft/api-extractor": "^7.58.7",
         "@qnx/client": "^0.8.7",
-        "@types/micromatch": "^4.0.9",
         "@vitejs/plugin-vue": "^6.0.7",
         "axios": "^1.16.1",
-        "fast-glob": "^3.3.3",
         "jsdom": "^29.1.1",
-        "micromatch": "^4.0.8",
         "path": "^0.12.7",
         "rollup": "^4.60.4",
-        "rollup-plugin-dts": "^6.2.1",
         "tslib": "^2.8.1",
         "typescript": "5.8.3",
         "vite": "^8.0.14",
+        "vite-plugin-dts": "^5.0.1",
         "vitest": "^3.2.4",
-        "vue": "3.5.35",
-        "vue-tsc": "^2.2.12"
+        "vue": "3.5.35"
     },
     "peerDependencies": {
         "axios": "*",

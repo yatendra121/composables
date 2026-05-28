@@ -13,11 +13,7 @@
         "esModuleInterop": true,
         "resolveJsonModule": false,
         "skipLibCheck": true,
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
-        "noEmit": false,
-        "outDir": "temp-types",
+        "noEmit": true,
         "paths": {
             "@/*": ["src/*"],
             "@qnx/composables": ["src/libs/core/index.ts"]
