@@ -39,7 +39,7 @@ export function useAxios<T = any, E = any>(
         cancelToken.cancel(message);
         aborted.value = true;
         isLoading.value = false;
-        isFinished.value = false;
+        isFinished.value = true;
     };
 
     instance<T>(url, { ...args, cancelToken: cancelToken.token })
@@ -71,7 +71,7 @@ export function useAxios<T = any, E = any>(
     };
 }
 
-export async function useAsyncAxios<T = any>(
+export async function useAsyncAxios<T = unknown>(
     url: string,
     args: RawAxiosRequestConfig,
     option: { cancelToken: CancelTokenSource } = {
@@ -89,38 +89,64 @@ export async function useAsyncAxios<T = any>(
     }
 }
 
-export async function* useAsyncAxiosGenerator<T = any>(
+export interface AsyncAxiosGeneratorOptions<T> {
+    /** Extra query params merged into every request. Not mutated. */
+    queryParams?: Record<string, unknown>;
+    /** Number of records per page. */
+    page_size: number;
+    /** 1-based page to start from. Defaults to 1. */
+    page?: number;
+    /** Delay in milliseconds between page requests. */
+    delay?: number;
+    /**
+     * Extracts the total record count from a page response so the generator
+     * knows when to stop. Defaults to reading `response.data.total`.
+     */
+    getTotalCount?: (response: T) => number | undefined;
+}
+
+const defaultGetTotalCount = <T>(response: T): number | undefined =>
+    (response as { data?: { total?: number } } | undefined)?.data?.total;
+
+/**
+ * Async generator that walks a paginated endpoint page by page. Yields each
+ * page response and accepts the next page number via `.next(page)`. Stops once
+ * the cumulative fetched count reaches the reported total.
+ *
+ * @typeParam T - Shape of a single page response body.
+ */
+export async function* useAsyncAxiosGenerator<T = unknown>(
     url: string,
     args: RawAxiosRequestConfig,
-    option: {
-        queryParams?: Record<string, unknown>;
-        page_size: number;
-        page?: number;
-        delay?: number;
-    } = {
-        page_size: 10
-    }
+    option: AsyncAxiosGeneratorOptions<T> = { page_size: 10 }
 ): AsyncGenerator<T, void, number | undefined> {
-    let page = 1;
-    let nextPage: number | undefined;
+    const getTotalCount = option.getTotalCount ?? defaultGetTotalCount;
+    let page = option.page ?? 1;
     let dataFinished = false;
 
-    while (nextPage !== 0 && !dataFinished) {
-        if (option.queryParams) option.queryParams["page"] = page;
+    while (!dataFinished) {
+        const queryParams = { ...(option.queryParams ?? {}), page };
 
-        const response = await useAsyncAxios<T>(
-            `${url}?${objectToQueryString(option.queryParams ?? {}, "")}`,
-            args
-        ).catch((e: unknown) => {
-            throw new Error(e instanceof Error ? e.message : String(e));
-        });
+        let response: T;
+        try {
+            response = await useAsyncAxios<T>(
+                `${url}?${objectToQueryString(queryParams, "")}`,
+                args
+            );
+        } catch (e: unknown) {
+            throw e instanceof Error ? e : new Error(String(e));
+        }
 
-        nextPage = yield response;
-        page = nextPage ?? page + 1;
+        const total = getTotalCount(response);
+        if (total !== undefined && option.page_size * page >= total) {
+            dataFinished = true;
+        }
+
+        const nextPage = yield response;
 
         if (option.delay && option.delay > 0)
-            await new Promise<void>((resolve) => setTimeout(resolve, option.delay));
-        // @ts-ignore: response.data.data.total assumes a paginated shape not statically encoded in T
-        if (option.page_size * page >= response.data.data.total) dataFinished = true;
+            await new Promise((resolve) => setTimeout(resolve, option.delay));
+
+        page = nextPage ?? page + 1;
     }
 }
