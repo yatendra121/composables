@@ -1,3 +1,26 @@
+## Unreleased
+
+Bugs
+
+- objectToFormData: send `0` and `false` instead of dropping them; empty strings are still dropped
+- objectToFormData: stop throwing on an invalid `Date`, and on Node 18, which has no global `File`
+- objectToQueryString: send `Date` values as ISO strings instead of dropping them
+- useAxios: 5xx, 403, 404 and network failures no longer end in an unhandled rejection
+- useAsyncAxiosGenerator: send `page_size`, which was only used locally to decide when to stop, so results could end early if the server's default differed
+- useAsyncAxiosGenerator: support a `url` that already has a query string, and skip the delay after the last page
+- useErrorResponse: a failing 401 handler is logged instead of rejecting unobserved or replacing the result; remove debug logging
+- package: `require` now resolves to the CommonJS build, which was built but unreachable
+- package: declare `@qnx/client`, which the published types re-export
+
+Features
+
+- useAxios: add an `error` ref for failures `errorResponse` can't carry
+- useErrorResponse: thrown errors keep the axios error as `cause`
+
+Chore
+
+- add a `type-check` script and run it in CI
+
 ## 0.8.1 (2026-05-27)
 
 Features

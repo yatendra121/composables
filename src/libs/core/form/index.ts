@@ -1,3 +1,5 @@
+const isValidDate = (value: Date) => !Number.isNaN(value.getTime());
+
 export const objectToFormData = (obj: Record<string, unknown>, form?: FormData, namespace?: string): FormData => {
     const fd = form ?? new FormData();
 
@@ -8,19 +10,13 @@ export const objectToFormData = (obj: Record<string, unknown>, form?: FormData, 
         const value = obj[property];
 
         if (value instanceof Date) {
-            fd.append(formKey, value.toISOString());
-        } else if (
-            value !== null &&
-            typeof value === "object" &&
-            !(value instanceof File) &&
-            !(value instanceof Blob)
-        ) {
-            objectToFormData(value as Record<string, unknown>, fd, formKey);
-        } else if (value instanceof File) {
-            fd.append(formKey, value, value.name);
+            if (isValidDate(value)) fd.append(formKey, value.toISOString());
         } else if (value instanceof Blob) {
+            // Covers File too: FormData keeps a File's own name.
             fd.append(formKey, value);
-        } else if (value) {
+        } else if (value !== null && typeof value === "object") {
+            objectToFormData(value as Record<string, unknown>, fd, formKey);
+        } else if (value || value === 0 || value === false) {
             fd.append(formKey, String(value));
         }
     }
@@ -35,7 +31,9 @@ export const objectToQueryString = (obj: Record<string, unknown>, prefix?: strin
         if (!Object.hasOwn(obj, p)) continue;
 
         const k = prefix ? `${prefix}[${p}]` : p;
-        const v = obj[p];
+        const raw = obj[p];
+        // A Date has no own keys, so it would otherwise recurse into nothing and vanish.
+        const v = raw instanceof Date ? (isValidDate(raw) ? raw.toISOString() : "") : raw;
         const value =
             v !== null && typeof v === "object"
                 ? objectToQueryString(v as Record<string, unknown>, k)

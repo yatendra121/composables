@@ -73,6 +73,39 @@ describe("useErrorResponse", () => {
         expect(handler).toHaveBeenCalledTimes(1);
     });
 
+    test("a rejecting async handler is logged, not left unhandled", async () => {
+        const failure = new Error("redirect failed");
+        const errorSpy = vi.spyOn(console, "error");
+        setHandleUnauthenticated(() => Promise.reject(failure));
+        const { getErrorResponse } = useErrorResponse();
+
+        const { status } = await getErrorResponse(responseError(401, {}));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(status.value).toBe(401);
+        expect(errorSpy).toHaveBeenCalledWith(failure);
+    });
+
+    test("a throwing handler doesn't replace the 401 result", async () => {
+        const errorSpy = vi.spyOn(console, "error");
+        setHandleUnauthenticated(() => {
+            throw new Error("boom");
+        });
+        const { getErrorResponse } = useErrorResponse();
+
+        const { status } = await getErrorResponse(responseError(401, {}));
+
+        expect(status.value).toBe(401);
+        expect(errorSpy).toHaveBeenCalled();
+    });
+
+    test("keeps the original axios error as the cause of a thrown error", async () => {
+        const original = responseError(500, { message: "x" }, "boom");
+        const { getErrorResponse } = useErrorResponse();
+
+        await expect(getErrorResponse(original)).rejects.toMatchObject({ cause: original });
+    });
+
     test("replacing the handler means only the latest one runs", async () => {
         const first = vi.fn();
         const second = vi.fn();

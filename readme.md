@@ -120,7 +120,7 @@ const users = await useAsyncAxios<User[]>('/users', { method: 'GET' })
 An async generator for paginated data fetching. Yields one page at a time and advances when `.next()` is called.
 
 ```ts
-import { useAsyncAxios } from '@qnx/composables/axios'
+import { useAsyncAxiosGenerator } from '@qnx/composables/axios'
 
 const generator = useAsyncAxiosGenerator('/users', { method: 'GET' }, {
   queryParams: { search: '' },
@@ -164,7 +164,7 @@ setHandleUnauthenticated(() => {
 
 | Function                              | Description                                     |
 | ------------------------------------- | ----------------------------------------------- |
-| `objectToFormData(obj, form?, ns?)`   | Recursively converts an object to `FormData`    |
+| `objectToFormData(obj, form?, ns?)`   | Recursively converts an object to `FormData`; skips `null`, `undefined` and `""` |
 | `objectToQueryString(obj, prefix?)`   | Converts an object to a URL query string        |
 
 ### Axios Composables
@@ -180,6 +180,8 @@ useAxios<T>(url: string, config: RawAxiosRequestConfig): UseAxiosReturn<T, E>
 | Returned Ref / Method | Type              | Description                           |
 | --------------------- | ----------------- | ------------------------------------- |
 | `response`            | `Ref<T>`          | Reactive response data                |
+| `errorResponse`       | `Ref<E>`          | Error body of a 400 or 422 response   |
+| `error`               | `Ref<Error>`      | Any other failure, with the axios error as `cause` |
 | `isLoading`           | `Ref<boolean>`    | `true` while the request is in flight |
 | `isFinished`          | `Ref<boolean>`    | `true` once the request completes     |
 | `loading`             | `Ref<boolean>`    | Alias for `isLoading`                 |
@@ -198,7 +200,7 @@ useAsyncAxios<T>(url: string, config: RawAxiosRequestConfig): Promise<T>
 #### useAsyncAxiosGenerator
 
 ```ts
-useAsyncAxiosGenerator<T>(url, config, { queryParams, page_size, page?, deley? }): AsyncGenerator<T>
+useAsyncAxiosGenerator<T>(url, config, { queryParams, page_size, page?, delay?, getTotalCount? }): AsyncGenerator<T>
 ```
 
 #### useErrorResponse
@@ -213,8 +215,7 @@ Handles status codes automatically:
 | ----------- | ------------------------------------------- |
 | 400, 422    | Populates `eResponse` with the error body   |
 | 401         | Calls the handler set by `setHandleUnauthenticated` |
-| 404, 405    | Throws an `Error`                           |
-| Other       | Throws an `Error`                           |
+| Other       | Throws an `Error` with the axios error as `cause` |
 
 #### setHandleUnauthenticated
 

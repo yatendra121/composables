@@ -1,5 +1,5 @@
 import { objectToFormData, objectToQueryString } from "../form";
-import { describe, expect, test, it } from "vitest";
+import { describe, expect, test, it, vi } from "vitest";
 
 describe("objectToFormData", () => {
     test("returns a FormData instance", () => {
@@ -103,17 +103,38 @@ describe("objectToFormData", () => {
         expect(formData.get("active")).toBe("true");
     });
 
-    // Documents a deliberate quirk: the final `else if (value)` branch is a
-    // truthiness check, so falsy primitives (0, "", false) are dropped.
-    test("drops falsy primitive values (0, empty string, false)", () => {
-        const data = { zero: 0, empty: "", flag: false, kept: "yes" };
+    test("keeps 0 and false, which are real values", () => {
+        const formData = objectToFormData({ zero: 0, flag: false, nested: { zero: 0 } });
 
-        const formData = objectToFormData(data);
+        expect(formData.get("zero")).toBe("0");
+        expect(formData.get("flag")).toBe("false");
+        expect(formData.get("nested[zero]")).toBe("0");
+    });
 
-        expect(formData.get("zero")).toBeNull();
+    test("still drops empty strings", () => {
+        const formData = objectToFormData({ empty: "", kept: "yes" });
+
         expect(formData.get("empty")).toBeNull();
-        expect(formData.get("flag")).toBeNull();
         expect(formData.get("kept")).toBe("yes");
+    });
+
+    test("skips an invalid Date instead of throwing", () => {
+        const formData = objectToFormData({ bad: new Date("nope"), kept: "yes" });
+
+        expect(formData.get("bad")).toBeNull();
+        expect(formData.get("kept")).toBe("yes");
+    });
+
+    test("does not need a global File, which Node 18 lacks", () => {
+        vi.stubGlobal("File", undefined);
+        try {
+            const formData = objectToFormData({ nested: { a: 1 }, blob: new Blob(["x"]) });
+
+            expect(formData.get("nested[a]")).toBe("1");
+            expect(formData.get("blob")).toBeInstanceOf(Blob);
+        } finally {
+            vi.unstubAllGlobals();
+        }
     });
 
     test("only copies own enumerable properties", () => {
@@ -167,6 +188,17 @@ describe("objectToQueryString", () => {
 
     it("applies an explicit prefix to top-level keys", () => {
         expect(objectToQueryString({ x: 1 }, "p")).toBe("p%5Bx%5D=1");
+    });
+
+    it("serializes Date values to ISO strings, nested ones too", () => {
+        const date = new Date("2024-01-15T10:00:00.000Z");
+        expect(decodeURIComponent(objectToQueryString({ from: date, range: { to: date } }))).toBe(
+            "from=2024-01-15T10:00:00.000Z&range[to]=2024-01-15T10:00:00.000Z"
+        );
+    });
+
+    it("renders an invalid Date as an empty value instead of throwing", () => {
+        expect(objectToQueryString({ from: new Date("nope") })).toBe("from=");
     });
 
     it("omits nested empty objects (they produce no pairs)", () => {
