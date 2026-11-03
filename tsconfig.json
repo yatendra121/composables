@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
         "target": "ESNext",
         "module": "ESNext",
         "moduleResolution": "bundler",
@@ -15,8 +14,8 @@
         "skipLibCheck": true,
         "noEmit": true,
         "paths": {
-            "@/*": ["src/*"],
-            "@qnx/composables": ["src/libs/core/index.ts"]
+            "@/*": ["./src/*"],
+            "@qnx/composables": ["./src/libs/core/index.ts"]
         },
         "types": ["vitest/globals"]
     },
