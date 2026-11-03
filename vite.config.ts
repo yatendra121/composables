@@ -2,6 +2,7 @@
 
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
     resolve: {
@@ -9,10 +10,17 @@ export default defineConfig({
             "@": resolve(__dirname, "./src")
         }
     },
-    plugins: [],
+    plugins: [
+        dts({
+            tsconfigPath: "./tsconfig.json",
+            include: ["src/**/*.ts"],
+            compilerOptions: { noEmit: false, declaration: true },
+            bundleTypes: true
+        })
+    ],
     define: { "process.env": {} },
     build: {
-        target: "esnext", //esnext/modules
+        target: "esnext",
         lib: {
             entry: {
                 index: resolve(__dirname, "src/index.ts"),
@@ -23,14 +31,7 @@ export default defineConfig({
             formats: ["es", "cjs"]
         },
         rolldownOptions: {
-            // make sure to externalize deps that shouldn't be bundled
-            // into your library
-            external: ["axios", "vue", "@qnx/composables"],
-            output: {
-                //format: 'esm',
-                // Provide global variables to use in the UMD build
-                // for externalized deps
-            }
+            external: ["axios", "vue", "@qnx/composables"]
         }
     },
     test: {

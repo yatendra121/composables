@@ -11,13 +11,16 @@ on:
             - main
             - next
 
+permissions:
+    contents: read
+
 jobs:
     test:
         runs-on: ubuntu-latest
 
         strategy:
             matrix:
-                node: [20.x, 22.x, 24.x]
+                node: [22.x, 24.x]
             fail-fast: false
 
         steps:
@@ -35,7 +38,10 @@ jobs:
                   cache: pnpm
 
             - name: Install
-              run: pnpm install --no-frozen-lockfile
+              run: pnpm install --frozen-lockfile
+
+            - name: Build
+              run: pnpm build
 
             - name: Unit test
               run: pnpm test:unit

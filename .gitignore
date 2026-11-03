@@ -13,6 +13,14 @@ dist-ssr
 temp-types
 *.local
 
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.npmrc
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
