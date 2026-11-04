@@ -130,6 +130,27 @@ describe("useAxios", () => {
         expect(isFinished.value).toBe(true);
     });
 
+    test.each([
+        ["a 500", { message: "boom", response: { status: 500 } }],
+        ["a network failure", { message: "boom" }]
+    ])("exposes %s via `error` without an unhandled rejection", async (_label, failure) => {
+        vi.spyOn(console, "error").mockImplementation(() => {});
+        const unhandled = vi.fn();
+        process.on("unhandledRejection", unhandled);
+        setAxiosInstance(vi.fn(() => Promise.reject(failure)) as unknown as AxiosInstance);
+
+        const { error, errorResponse, isFinished } = useAxios("/users", { method: "GET" });
+        await flush();
+        await flush();
+        process.off("unhandledRejection", unhandled);
+
+        expect(unhandled).not.toHaveBeenCalled();
+        expect(error.value?.message).toBe("boom");
+        expect(error.value?.cause).toBe(failure);
+        expect(errorResponse.value).toBeUndefined();
+        expect(isFinished.value).toBe(true);
+    });
+
     test("ignores cancellation errors (leaves errorResponse empty)", async () => {
         // axios.isCancel() keys off __CANCEL__.
         setAxiosInstance(rejectingInstance({ __CANCEL__: true, message: "canceled" }));
@@ -227,10 +248,49 @@ describe("useAsyncAxiosGenerator", () => {
         }
 
         expect(calls.map((c) => c.url)).toEqual([
-            "/users?search=abc&page=1",
-            "/users?search=abc&page=2",
-            "/users?search=abc&page=3"
+            "/users?page_size=10&search=abc&page=1",
+            "/users?page_size=10&search=abc&page=2",
+            "/users?page_size=10&search=abc&page=3"
         ]);
+    });
+
+    test("lets queryParams override the page_size it sends", async () => {
+        const { instance, calls } = recordingInstance({ data: { total: 1 } });
+        setAxiosInstance(instance);
+
+        const gen = useAsyncAxiosGenerator(
+            "/users",
+            { method: "GET" },
+            { page_size: 10, queryParams: { page_size: 50 } }
+        );
+        await gen.next();
+
+        expect(calls[0].url).toBe("/users?page_size=50&page=1");
+    });
+
+    test("appends to a url that already has a query string", async () => {
+        const { instance, calls } = recordingInstance({ data: { total: 1 } });
+        setAxiosInstance(instance);
+
+        const gen = useAsyncAxiosGenerator(
+            "/users?active=1",
+            { method: "GET" },
+            { page_size: 10 }
+        );
+        await gen.next();
+
+        expect(calls[0].url).toBe("/users?active=1&page_size=10&page=1");
+    });
+
+    test("does not wait out the delay after the last page", async () => {
+        const gen = useAsyncAxiosGenerator(
+            "/users",
+            { method: "GET" },
+            { page_size: 100, delay: 60_000 }
+        );
+        await gen.next();
+
+        await expect(gen.next()).resolves.toEqual({ value: undefined, done: true });
     });
 
     test("does not mutate the caller's queryParams object", async () => {
@@ -274,7 +334,7 @@ describe("useAsyncAxiosGenerator", () => {
         expect(first.done).toBe(false);
         expect(second.done).toBe(true);
         expect(calls).toHaveLength(1);
-        expect(calls[0].url).toBe("/users?page=3");
+        expect(calls[0].url).toBe("/users?page_size=10&page=3");
     });
 
     test("lets the consumer drive the next page via .next(page)", async () => {
@@ -290,8 +350,8 @@ describe("useAsyncAxiosGenerator", () => {
         await gen.next(); // fetch page 1
         await gen.next(5); // consumer jumps to page 5
 
-        expect(calls[0].url).toBe("/users?page=1");
-        expect(calls[1].url).toBe("/users?page=5");
+        expect(calls[0].url).toBe("/users?page_size=10&page=1");
+        expect(calls[1].url).toBe("/users?page_size=10&page=5");
     });
 
     test("supports a custom getTotalCount extractor", async () => {

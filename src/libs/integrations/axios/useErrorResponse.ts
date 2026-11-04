@@ -1,19 +1,21 @@
 import { shallowRef } from "vue";
 import type { AxiosError } from "axios";
 
-function isPromise(value: unknown): value is Promise<unknown> {
-    return !!value && typeof (value as Promise<unknown>).then === "function";
-}
+const isPromise = (value: unknown): value is Promise<unknown> =>
+    !!value && typeof (value as Promise<unknown>).then === "function";
 
+// A failing handler must not replace the request's own outcome, or reject unobserved.
 const executeFunction = (fun: () => void | Promise<void>) => {
-    const result = fun();
-    if (isPromise(result)) {
-        result.then(() => console.log("promise unauthentication handler executed"));
+    try {
+        const result = fun();
+        if (isPromise(result)) result.catch(console.error);
+    } catch (e: unknown) {
+        console.error(e);
     }
 };
 
 let unauthenticationError: () => void | Promise<void> = () =>
-    console.log("no unauthenticate handled");
+    console.warn("[@qnx/composables] 401 received; register a handler with setHandleUnauthenticated");
 
 export const setHandleUnauthenticated = (fun: () => void | Promise<void>) => {
     unauthenticationError = fun;
@@ -35,11 +37,11 @@ export default function useErrorResponse() {
             } else if (r.status === 401) {
                 executeFunction(unauthenticationError);
             } else {
-                throw new Error(response.message);
+                throw new Error(response.message, { cause: response });
             }
         } else {
             console.error("API Error (No response):", response.message);
-            throw new Error(response.message);
+            throw new Error(response.message, { cause: response });
         }
 
         return { status, statusText, eResponse: errorResponse };

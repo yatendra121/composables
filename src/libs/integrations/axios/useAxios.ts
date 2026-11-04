@@ -10,6 +10,8 @@ import type { RawAxiosRequestConfig } from "axios";
 export interface UseAxiosReturn<T, E> {
     response: Ref<T | undefined>;
     errorResponse: Ref<E | undefined>;
+    /** Set when the request failed in a way `errorResponse` can't carry (5xx, 403, network). */
+    error: Ref<Error | undefined>;
     finished: Ref<boolean>;
     loading: Ref<boolean>;
     isFinished: Ref<boolean>;
@@ -31,6 +33,7 @@ export function useAxios<T = any, E = any>(
     const isLoading = ref(true);
     const aborted = ref(false);
     const errorResponse = shallowRef<E>();
+    const error = shallowRef<Error>();
 
     const cancelToken: CancelTokenSource = axios.CancelToken.source();
     const abort = (message?: string) => {
@@ -49,8 +52,14 @@ export function useAxios<T = any, E = any>(
         .catch(async (e: AxiosError<E>) => {
             if (axios.isCancel(e)) return;
             const { getErrorResponse } = useErrorResponse();
-            const { eResponse } = await getErrorResponse<E>(e);
-            errorResponse.value = eResponse.value;
+            try {
+                const { eResponse } = await getErrorResponse<E>(e);
+                errorResponse.value = eResponse.value;
+            } catch (unhandled: unknown) {
+                // getErrorResponse throws for anything but 400/401/422. Nothing awaits
+                // this chain, so rethrowing would be an unhandled rejection.
+                error.value = unhandled as Error;
+            }
         })
         .finally(() => {
             isLoading.value = false;
@@ -60,6 +69,7 @@ export function useAxios<T = any, E = any>(
     return {
         response,
         errorResponse,
+        error,
         finished: isFinished,
         loading: isLoading,
         isFinished,
@@ -81,18 +91,14 @@ export async function useAsyncAxios<T = unknown>(
     const instance: AxiosInstance = AxiosPlugin.getInstance();
     const { cancelToken } = option;
 
-    try {
-        const res = await instance<T>(url, { ...args, cancelToken: cancelToken.token });
-        return res.data;
-    } catch (e: unknown) {
-        return Promise.reject(e as AxiosError<T>);
-    }
+    const res = await instance<T>(url, { ...args, cancelToken: cancelToken.token });
+    return res.data;
 }
 
 export interface AsyncAxiosGeneratorOptions<T> {
     /** Extra query params merged into every request. Not mutated. */
     queryParams?: Record<string, unknown>;
-    /** Number of records per page. */
+    /** Number of records per page. Sent as `page_size`; override via `queryParams`. */
     page_size: number;
     /** 1-based page to start from. Defaults to 1. */
     page?: number;
@@ -123,14 +129,15 @@ export async function* useAsyncAxiosGenerator<T = unknown>(
     const getTotalCount = option.getTotalCount ?? defaultGetTotalCount;
     let page = option.page ?? 1;
     let dataFinished = false;
+    const separator = url.includes("?") ? "&" : "?";
 
     while (!dataFinished) {
-        const queryParams = { ...(option.queryParams ?? {}), page };
+        const queryParams = { page_size: option.page_size, ...(option.queryParams ?? {}), page };
 
         let response: T;
         try {
             response = await useAsyncAxios<T>(
-                `${url}?${objectToQueryString(queryParams, "")}`,
+                `${url}${separator}${objectToQueryString(queryParams, "")}`,
                 args
             );
         } catch (e: unknown) {
@@ -144,7 +151,7 @@ export async function* useAsyncAxiosGenerator<T = unknown>(
 
         const nextPage = yield response;
 
-        if (option.delay && option.delay > 0)
+        if (!dataFinished && option.delay && option.delay > 0)
             await new Promise((resolve) => setTimeout(resolve, option.delay));
 
         page = nextPage ?? page + 1;

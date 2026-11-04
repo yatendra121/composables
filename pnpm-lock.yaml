@@ -7,13 +7,14 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@qnx/client':
+        specifier: ^0.8.10
+        version: 0.8.10
     devDependencies:
       '@microsoft/api-extractor':
         specifier: ^7.60.1
         version: 7.60.1
-      '@qnx/client':
-        specifier: ^0.8.10
-        version: 0.8.10
       '@vitejs/plugin-vue':
         specifier: ^6.0.10
         version: 6.0.10(vite@8.3.5)(vue@3.5.44(typescript@5.8.3))
